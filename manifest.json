@@ -1,0 +1,10 @@
+{
+  "name": "SF Siparişler",
+  "short_name": "SF Sipariş",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef3fb",
+  "theme_color": "#FF7B00",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

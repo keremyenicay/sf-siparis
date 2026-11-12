@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FF7B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SF Siparişler">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>SF Siparişler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/*
+  SF Siparişler — Sunucu Modu panelinin (sfadminlog/userscripts/sellerflash-panel.user.js)
+  telefondan görülebilen, SALT OKUNUR kopyası. Veri: Supabase sf_store → DB_<mktId>.
+  Durum kuralları (OrderState, isDeliveredText, deliveryMatch) panelle AYNI tutulmalı.
+*/
+:root {
+  --bg0: #eef3fb; --bg1: #ffffff; --bg2: #f8fafc; --line: rgba(15,23,42,.09);
+  --tx: #0f172a; --tx2: #475569; --tx3: #94a3b8;
+  --acc: #FF7B00; --acc2: #FFC300; --grad: linear-gradient(135deg, var(--acc), var(--acc2));
+  --link: #1d4ed8; --link2: #c2410c;
+  --g: #059669; --g-bg: #dcfce7; --b: #0284c7; --b-bg: #e0f2fe; --o: #c2410c; --o-bg: #ffedd5;
+  --r: #dc2626; --r-bg: #fee2e2; --p: #7c3aed; --p-bg: #ede9fe; --gy: #475569; --gy-bg: #f1f5f9;
+  --shadow: 0 1px 2px rgba(15,23,42,.06), 0 4px 14px rgba(15,23,42,.05);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg0: #0b1220; --bg1: #111a2b; --bg2: #16213a; --line: rgba(148,163,184,.14);
+  --tx: #e2e8f0; --tx2: #a3b1c6; --tx3: #64748b; --link: #7cb3ff; --link2: #fb9a5b;
+  --g: #4ade80; --g-bg: rgba(74,222,128,.13); --b: #38bdf8; --b-bg: rgba(56,189,248,.13); --o: #fb923c; --o-bg: rgba(251,146,60,.14);
+  --r: #f87171; --r-bg: rgba(248,113,113,.14); --p: #a78bfa; --p-bg: rgba(167,139,250,.14); --gy: #a3b1c6; --gy-bg: rgba(148,163,184,.12);
+  --shadow: 0 1px 2px rgba(0,0,0,.3);
+} }
+:root[data-theme="dark"] {
+  --bg0: #0b1220; --bg1: #111a2b; --bg2: #16213a; --line: rgba(148,163,184,.14);
+  --tx: #e2e8f0; --tx2: #a3b1c6; --tx3: #64748b; --link: #7cb3ff; --link2: #fb9a5b;
+  --g: #4ade80; --g-bg: rgba(74,222,128,.13); --b: #38bdf8; --b-bg: rgba(56,189,248,.13); --o: #fb923c; --o-bg: rgba(251,146,60,.14);
+  --r: #f87171; --r-bg: rgba(248,113,113,.14); --p: #a78bfa; --p-bg: rgba(167,139,250,.14); --gy: #a3b1c6; --gy-bg: rgba(148,163,184,.12);
+  --shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg0); color: var(--tx); font: 14px/1.4 'DM Sans', system-ui, sans-serif; overflow-x: hidden; }
+a { color: var(--link); text-decoration: none; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; }
+button { font: inherit; cursor: pointer; }
+
+/* Üst bar */
+header { position: sticky; top: 0; z-index: 10; background: var(--bg1); border-bottom: 1px solid var(--line);
+  padding: calc(env(safe-area-inset-top) + 10px) 16px 10px; box-shadow: var(--shadow); }
+.hrow { display: flex; align-items: center; gap: 8px; }
+.logo { width: 30px; height: 30px; border-radius: 9px; background: var(--grad); color: #fff; font-weight: 700; font-size: 13px;
+  display: grid; place-items: center; flex: none; }
+h1 { font-size: 16px; margin: 0; font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ibtn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--tx); display: grid; place-items: center; font-size: 16px; flex: none; }
+.ibtn.spin span { display: inline-block; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 12px; color: var(--tx2); flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tx3); display: inline-block; margin-right: 4px; }
+.dot.on { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.2); } .dot.off { background: var(--r); }
+select, input.q { width: 100%; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--tx);
+  padding: 0 12px; font: inherit; font-size: 16px; /* iOS zoom yapmasın */ }
+.ctl { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 10px; }
+.qwrap { position: relative; } .qwrap input { padding-right: 36px; }
+.qclr { position: absolute; right: 4px; top: 4px; width: 32px; height: 32px; border: 0; background: none; color: var(--tx3); font-size: 16px; display: none; }
+
+/* Durum çipleri */
+.chips { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px 2px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--bg1); color: var(--tx2); border-radius: 999px; padding: 6px 11px; font-size: 13px; white-space: nowrap; }
+.chip b { color: var(--tx); margin-left: 4px; font-weight: 700; }
+.chip.on { background: var(--tx); color: var(--bg1); border-color: var(--tx); } .chip.on b { color: var(--bg1); }
+.hint { padding: 6px 16px 0; font-size: 12px; color: var(--tx3); }
+
+/* Kartlar */
+main { padding: 8px 16px calc(env(safe-area-inset-bottom) + 24px); }
+.card { background: var(--bg1); border: 1px solid var(--line); border-left: 4px solid var(--tx3); border-radius: 12px; padding: 10px 12px; margin-top: 8px; box-shadow: var(--shadow); min-width: 0; }
+.card.k-del { border-left-color: var(--g); } .card.k-shp { border-left-color: var(--b); } .card.k-dep { border-left-color: #6366f1; }
+.card.k-alm { border-left-color: var(--r); } .card.k-ref { border-left-color: var(--o); }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.oid { font-weight: 600; word-break: break-all; }
+.date { font-size: 12px; color: var(--tx3); white-space: nowrap; }
+.sub { font-size: 12px; color: var(--tx2); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+.rows { margin-top: 8px; display: grid; gap: 4px; }
+.r { display: grid; grid-template-columns: 74px minmax(0,1fr); gap: 8px; font-size: 13px; align-items: baseline; }
+.r > span:first-child { color: var(--tx3); font-size: 12px; }
+.r > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.bd { display: inline-block; border-radius: 6px; padding: 1px 7px; font-size: 12px; font-weight: 600; background: var(--gy-bg); color: var(--gy); white-space: nowrap; }
+.bd-g { background: var(--g-bg); color: var(--g); } .bd-b { background: var(--b-bg); color: var(--b); } .bd-o { background: var(--o-bg); color: var(--o); }
+.bd-r { background: var(--r-bg); color: var(--r); } .bd-p { background: var(--p-bg); color: var(--p); }
+.cp { border: 0; background: none; color: var(--tx3); padding: 0 4px; font-size: 12px; }
+.profit { font-weight: 700; } .profit.neg { color: var(--r); } .profit.pos { color: var(--g); }
+.empty, .more { text-align: center; color: var(--tx3); padding: 28px 0; font-size: 13px; }
+.err { margin: 10px 16px 0; background: var(--r-bg); color: var(--r); border-radius: 10px; padding: 10px 12px; font-size: 13px; display: none; }
+
+/* Ayar ekranı */
+#cfg { position: fixed; inset: 0; z-index: 50; background: var(--bg0); display: none; overflow-y: auto; padding: calc(env(safe-area-inset-top) + 24px) 16px 24px; }
+.cfgbox { max-width: 440px; margin: 0 auto; background: var(--bg1); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+.cfgbox h2 { margin: 12px 0 4px; font-size: 18px; } .cfgbox p { margin: 0 0 14px; color: var(--tx2); font-size: 13px; }
+.cfgbox label { display: block; font-size: 12px; color: var(--tx2); margin: 12px 0 4px; font-weight: 600; }
+.cfgbox input { width: 100%; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--tx); padding: 0 12px; font: inherit; font-size: 16px; }
+.btn { width: 100%; height: 44px; border: 0; border-radius: 10px; background: var(--grad); color: #fff; font-weight: 700; margin-top: 18px; }
+.btn2 { width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); color: var(--tx2); margin-top: 8px; }
+.cfgerr { color: var(--r); font-size: 13px; margin-top: 10px; min-height: 1em; }
+.note { font-size: 12px; color: var(--tx3); margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <div class="logo">SF</div>
+    <h1 id="title">Siparişler</h1>
+    <button class="ibtn" id="btn-refresh" title="Yenile" aria-label="Yenile"><span>↻</span></button>
+    <button class="ibtn" id="btn-cfg" title="Ayarlar" aria-label="Ayarlar">⚙️</button>
+  </div>
+  <div class="meta">
+    <span id="srv"><span class="dot"></span>Sunucu: —</span>
+    <span id="upd">—</span>
+  </div>
+  <div class="ctl">
+    <select id="mkt" aria-label="Mağaza"></select>
+    <div class="qwrap">
+      <input class="q" id="q" type="search" placeholder="Ara: sipariş, ASIN, takip · 3 gün" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <button class="qclr" id="qclr" aria-label="Temizle">✕</button>
+    </div>
+  </div>
+</header>
+
+<div class="chips" id="chips"></div>
+<div class="hint" id="hint"></div>
+<div class="err" id="err"></div>
+<main id="list"></main>
+
+<div id="cfg">
+  <div class="cfgbox">
+    <div class="logo">SF</div>
+    <h2>Bağlantı ayarları</h2>
+    <p>Bu bilgiler yalnız bu cihazın tarayıcısında saklanır.</p>
+    <label for="c-url">Supabase URL</label>
+    <input id="c-url" type="url" placeholder="https://xxxx.supabase.co" autocomplete="off" autocapitalize="off" autocorrect="off">
+    <label for="c-key">Supabase Anon Key</label>
+    <input id="c-key" type="password" placeholder="eyJ… veya sb_publishable_…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <label for="c-mkts">Mağaza (Marketplace) ID'leri — virgülle</label>
+    <input id="c-mkts" type="text" inputmode="numeric" placeholder="78524,87709,130702" autocomplete="off">
+    <div class="cfgerr" id="c-err"></div>
+    <button class="btn" id="c-save">Kaydet ve aç</button>
+    <button class="btn2" id="c-cancel">Vazgeç</button>
+    <button class="btn2" id="c-theme">Tema: otomatik</button>
+    <div class="note">Sayfa salt okunurdur: siparişlerde değişiklik yapmaz. Sunucu Modu panelinde gizlenen siparişler burada görünür.</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ───────── Ayarlar ─────────
+const CFG_KEY = 'sfm_cfg', UI_KEY = 'sfm_ui';
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (_) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
+};
+let CFG = ls.get(CFG_KEY, null);
+const UI = Object.assign({ mkt: 'ALL', filter: 'ALL', theme: '' }, ls.get(UI_KEY, {}));
+const saveUI = () => ls.set(UI_KEY, UI);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function applyTheme() {
+  if (UI.theme) document.documentElement.setAttribute('data-theme', UI.theme); else document.documentElement.removeAttribute('data-theme');
+  $('c-theme').textContent = 'Tema: ' + ({ '': 'otomatik', light: 'açık', dark: 'koyu' }[UI.theme || '']);
+}
+
+// ───────── Supabase (salt okunur) ─────────
+async function sbRow(key) {
+  const res = await fetch(`${CFG.url}/rest/v1/sf_store?key=eq.${encodeURIComponent(key)}&select=value,updated_at&limit=1`, {
+    headers: { apikey: CFG.key, Authorization: `Bearer ${CFG.key}` }, cache: 'no-store',
+  });
+  if (!res.ok) { const e = new Error(`HTTP ${res.status}`); e.status = res.status; throw e; }
+  const rows = await res.json();
+  if (!rows.length) return null;
+  let v = rows[0].value;
+  if (typeof v === 'string') { try { v = JSON.parse(v); } catch (_) {} }
+  return { value: v, updatedAt: rows[0].updated_at ? Date.parse(rows[0].updated_at) : null };
+}
+
+// ───────── Durum kuralları (panelle aynı) ─────────
+const DELIVERED_RE = /\bdelivered\b|proof of delivery|delivery (?:successful|success|completed|complete)|teslim edildi|zugestellt|livr[ée]|consegnat[oa]|entregad[oa]|bezorgd/i;
+const NOT_DELIVERED_RE = /out for delivery|attempt|failed|unable|exception|not delivered|undeliver|scheduled|delayed|could not|wird zugestellt|en cours de livraison/i;
+const isDeliveredText = t => DELIVERED_RE.test(t || '') && !NOT_DELIVERED_RE.test(t || '');
+const BAD_WH = ['DİĞER', 'BİLİNMİYOR', '—', ''];
+
+const OrderState = {
+  isDelivered: o => {
+    if (o.sfDelivered) return true;
+    if (o.whTrackStatus?.toLowerCase().includes('teslim')) return true;
+    if (o.whTracking && isDeliveredText(o.whTrackStatus)) return true;
+    return false;
+  },
+  isShipped: o => {
+    if (OrderState.isDelivered(o)) return false;
+    if (o.whTracking && o.whTrackStatus && !['Yeni Gönderi', 'Paket Alındı', 'Ödeme Bekleniyor', 'Ödendi', 'Etiketi Eklendi'].includes(o.whStatus)) return true;
+    return !!o.isShipped;
+  },
+  isDepot: o => {
+    if (OrderState.isDelivered(o) || OrderState.isShipped(o)) return false;
+    if (o.status === 'Delivered' && !o.isShipped) return true;
+    if (o.shipmentId && o.whStatus === 'Etiketi Eklendi') return true;
+    if (o.shipmentId && o.whStatus === 'Kargoya Verildi' && !o.whTracking) return true;
+    return false;
+  },
+  isComing: o => !OrderState.isDepot(o) && !OrderState.isShipped(o) && !OrderState.isDelivered(o)
+                 && !!o.status && /shipped|arriving|out for delivery/i.test(o.status),
+  staleDays: o => {
+    if (!o.whTracking || !o.whTrackStatusAt || OrderState.isDelivered(o)) return null;
+    if (/no tracking/i.test(o.whTracking)) return null;
+    return Math.floor((Date.now() - o.whTrackStatusAt) / 86400000);
+  },
+  isStale: o => (OrderState.staleDays(o) ?? -1) >= 3,
+  staleText: o => {
+    const sd = OrderState.staleDays(o);
+    if (sd === null) return '';
+    return sd === 0 ? 'bugün güncellendi' : `${o.whTrackStatusAtApprox ? '≥' : ''}${sd} gündür aynı`;
+  },
+  isOtherAcc: o => !!(o.status?.includes('Diğer Hesapta') || o.status?.includes('Hesapta 🔄')),
+  isSellerRefunded: o => o.isSellerRefunded === true,
+  isBuyerRefunded: o => o.isBuyerRefunded === true,
+  isAlarm: o => !o.isDeadOrder && !o.isSellerRefunded && !o.isBuyerRefunded && !OrderState.isDelivered(o)
+               && !!(o.isCancelledSF || o.hasCargoIssue || o.deliveryOverdue || o.status?.includes('Cancel')),
+  isAmz: o => {
+    const d = OrderState.isDelivered(o), s = OrderState.isShipped(o), dep = OrderState.isDepot(o), com = OrderState.isComing(o);
+    const oth = OrderState.isOtherAcc(o), ref = o.isSellerRefunded || o.isBuyerRefunded, alm = OrderState.isAlarm(o);
+    return !(o.isDeadOrder && !o.idNotFound) && !dep && !com && !s && !d && !oth && !ref && !alm;
+  },
+};
+const isRealDepot = o => OrderState.isDepot(o) && o.warehouse && !BAD_WH.includes(o.warehouse);
+
+const FILTERS = [
+  ['ALL', 'Tümü', () => true],
+  ['AMZ', 'AMZ Bekl.', OrderState.isAmz],
+  ['COMING', 'Yolda', OrderState.isComing],
+  ['DEPOT', 'Depoda', isRealDepot],
+  ['SHIPPED', 'Kargoda', OrderState.isShipped],
+  ['DELIVERED', 'Teslim', OrderState.isDelivered],
+  ['STALE', '⏳ Kargo Bekliyor', OrderState.isStale],
+  ['ALARM', '🚨 Alarm', OrderState.isAlarm],
+  ['SELLER_REFUNDED', '💸 Müşt.İade', OrderState.isSellerRefunded],
+  ['BUYER_REFUNDED', '💰 AMZ İade', OrderState.isBuyerRefunded],
+  ['OTHER', 'Diğer Acc', OrderState.isOtherAcc],
+  ['NOPV', 'Token Eksik', o => o.whError === 'NoPV'],
+];
+
+// "3", "3 gün", "3 gündür aynı", "3+" → 3 gün ve üzeri; "=3" → tam 3 gün (paneldeki Teslimat filtresiyle aynı)
+function staleQuery(q) {
+  const m = q.match(/^\s*(=)?\s*[≥>]?\s*(\d+)\s*(?:\+|g(?:ü|u)n|gündür|gundur|$|\s)/i);
+  if (!m || q.replace(/\D/g, '').length > 3) return null;   // uzun sayılar sipariş/takip no'dur
+  return { exact: !!m[1], n: +m[2] };
+}
+
+// ───────── Para / bağlantılar ─────────
+const currencyOf = mkt => ['78524', '216116', '87709'].includes(String(mkt)) ? 'AUD' : String(mkt) === '191308' ? 'GBP' : 'EUR';
+const SYM = { AUD: 'A$', GBP: '£', EUR: '€' };
+function whTrackUrl(d) {
+  if (!d.whTracking) return null;
+  if (d.trackUrl) return d.trackUrl;
+  const t = encodeURIComponent(d.whTracking), co = (d.cargoCompany || '').toLowerCase();
+  if (co.includes('asendia')) return `https://a1.asendiausa.com/tracking/?trackingnumber=${t}`;
+  if (co.includes('apc')) return `https://tracking.apc-pli.com/${t}`;
+  if (co.includes('dhl')) return `https://www.dhl.com/tr-en/home/tracking.html?tracking-id=${t}&submit=1`;
+  if (co.includes('fedex')) return `https://www.fedex.com/fedextrack/?trknbr=${t}`;
+  if (co.includes('ups')) return `https://www.ups.com/track?tracknum=${t}`;
+  if (co.includes('epost') || co.includes('epg')) return `https://portal.epgshipping.com/?tracknumber=${t}`;
+  return null;
+}
+function amzTrackUrl(d) {
+  const t = encodeURIComponent(d.amazonTrackingId || ''), c = (d.amazonCarrier || '').toLowerCase();
+  if (c.includes('usps')) return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${t}`;
+  if (c.includes('ups')) return `https://www.ups.com/track?tracknum=${t}`;
+  if (c.includes('fedex')) return `https://www.fedex.com/fedextrack/?trknbr=${t}`;
+  if (c.includes('dhl')) return `https://www.dhl.com/tr-en/home/tracking.html?tracking-id=${t}&submit=1`;
+  return `https://parcelsapp.com/en/tracking/${t}`;
+}
+const safeUrl = u => /^https:\/\//i.test(u || '') ? u : null;
+const link = (url, text, cls = '') => url ? `<a class="mono ${cls}" href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}</a>` : `<span class="mono">${esc(text)}</span>`;
+const copyBtn = v => `<button class="cp" data-copy="${esc(v)}" aria-label="Kopyala">⧉</button>`;
+const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : '';
+
+function amzBadge(d) {
+  const s = d.status || '';
+  if (d.idNotFound && !d.isCancelledSF) return '<span class="bd bd-o">⏳ ID Yok</span>';
+  if (d.isCancelledSF || s.includes('Cancel')) return '<span class="bd bd-r">🚫 İptal</span>';
+  if (d.deliveryOverdue) return '<span class="bd bd-r">⏰ Gecikti</span>';
+  if (d.isSellerRefunded) return '<span class="bd bd-r">💸 Müşt.İade</span>';
+  if (d.isBuyerRefunded) return '<span class="bd bd-o">💰 AMZ İade</span>';
+  if (s === 'Delivered') { const dt = fmtDate(d.amazonDeliveredAt || d.deliveredToWarehouseAt); return `<span class="bd bd-b">✓ Delivered${dt ? ' · ' + dt : ''}</span>`; }
+  if (s.includes('Shipped')) return '<span class="bd bd-g">🚚 Shipped</span>';
+  if (s === 'Arriving') return `<span class="bd bd-g">📦 ${esc(d.amazonStatusText && d.amazonStatusText.length < 40 ? d.amazonStatusText : 'Arriving')}</span>`;
+  if (/In Transit/.test(s)) return `<span class="bd bd-g">🚚 ${esc(s)}</span>`;
+  if (s === 'Delayed') return '<span class="bd bd-o">⏰ Delayed</span>';
+  if (['Not Shipped', 'Preparing', 'Ordered'].includes(s)) return `<span class="bd bd-o">${esc(s)}</span>`;
+  if (s.includes('Diğer')) return `<span class="bd bd-p">${esc(s)}</span>`;
+  if (/Hata|Link|Login|Cancel|Sıraya/i.test(s)) return `<span class="bd bd-r">${esc(s)}</span>`;
+  return `<span class="bd">${esc(s || '?')}</span>`;
+}
+
+function cardHtml(item, showStore) {
+  const { id, d, mkt } = item;
+  const kind = OrderState.isAlarm(d) ? 'k-alm' : (d.isSellerRefunded || d.isBuyerRefunded) ? 'k-ref'
+    : OrderState.isDelivered(d) ? 'k-del' : OrderState.isShipped(d) ? 'k-shp' : OrderState.isDepot(d) ? 'k-dep' : '';
+  const rows = [];
+  const row = (k, v) => rows.push(`<div class="r"><span>${k}</span><span>${v}</span></div>`);
+
+  row('Amazon', amzBadge(d));
+  if (d.buyerOrderId && d.buyerOrderId !== '—')
+    row('Buyer No', link(`https://www.amazon.com/your-orders/order-details?orderID=${encodeURIComponent(d.buyerOrderId)}`, d.buyerOrderId) + copyBtn(d.buyerOrderId));
+  if (d.amazonTrackingId)
+    row('AMZ Kargo', (d.amazonCarrier ? `<span class="bd" style="margin-right:4px">${esc(d.amazonCarrier)}</span>` : '') + link(amzTrackUrl(d), d.amazonTrackingId) + copyBtn(d.amazonTrackingId));
+  if (d.warehouse || d.whStatus) {
+    let dep = `${esc(d.warehouse || '—')}${d.warehouseId ? ` <span class="mono" style="color:var(--tx3)">${esc(d.warehouseId)}</span>` : ''}`;
+    if (d.whStatus) dep += ` · <span style="color:var(--tx2)">${esc(d.whStatus)}</span>`;
+    if (!d.isShipped && !d.sfDelivered && !d.whTrackStatus?.includes('Teslim') && d.status === 'Delivered') {
+      const ts = d.amazonDeliveredAt || d.deliveredToWarehouseAt || d.lastCheck || 0;
+      if (ts) { const n = Math.floor((Date.now() - ts) / 86400000); dep += ` <span class="bd ${n >= 7 ? 'bd-r' : n >= 3 ? 'bd-o' : 'bd-b'}">${n === 0 ? 'Bugün' : n + ' gündür depoda'}</span>`; }
+    }
+    row('Depo', dep);
+  }
+  if (d.whTracking) {
+    const co = d.cargoCompany ? `<span class="bd" style="margin-right:4px">${esc(d.cargoCompany)}</span>` : '';
+    row('Kargo', co + link(safeUrl(whTrackUrl(d)), d.whTracking) + copyBtn(d.whTracking));
+  }
+  if (d.whTrackStatus || OrderState.staleDays(d) !== null) {
+    const sd = OrderState.staleDays(d);
+    let v = esc(d.whTrackStatus || '—');
+    if (sd !== null) {
+      const cls = sd >= 5 ? 'bd-r' : sd >= 3 ? 'bd-o' : '';
+      v += ` <span class="bd ${cls}" title="${esc(fmtDate(d.whTrackStatusAt))} tarihinden beri">⏳ ${esc(OrderState.staleText(d))}</span>`;
+    }
+    row('Teslimat', v);
+  }
+  if (d.exitDate) row('Çıkış', esc(d.exitDate));
+  const profit = parseFloat(d.finalProfit ?? d.profit);
+  if (!isNaN(profit) && profit !== 0)
+    row('Kâr', `<span class="profit ${profit < 0 ? 'neg' : 'pos'}">${profit < 0 ? '−' : ''}${SYM[currencyOf(mkt)]}${Math.abs(profit).toFixed(2)}</span>`);
+
+  const sub = [];
+  if (d.asin) sub.push(link(`https://www.amazon.com/dp/${encodeURIComponent(d.asin)}`, d.asin));
+  if (showStore) sub.push(`<span>${esc(STORE_NAMES[mkt] || 'Mağaza ' + mkt)}</span>`);
+  if (d.lastCheck) sub.push(`<span>kontrol ${new Date(d.lastCheck).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>`);
+
+  return `<div class="card ${kind}">
+    <div class="top"><div class="oid">${link(`https://panel.sellerflash.com/sellerOrder/${encodeURIComponent(id)}`, id)}${copyBtn(id)}</div>
+      <div class="date">${d.orderDate ? esc(new Date(d.orderDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: '2-digit' })) : ''}</div></div>
+    <div class="sub">${sub.join('')}</div>
+    <div class="rows">${rows.join('')}</div>
+  </div>`;
+}
+
+// ───────── Veri ve çizim ─────────
+let DATA = {};          // mkt → { id: order }
+let STORE_NAMES = {};
+let VIEW = [];          // filtrelenmiş liste
+let shown = 0;
+const PAGE = 100;
+
+function allItems() {
+  const mkts = UI.mkt === 'ALL' ? CFG.mkts : [UI.mkt];
+  const out = [];
+  for (const mkt of mkts) for (const [id, d] of Object.entries(DATA[mkt] || {})) if (d && typeof d === 'object') out.push({ id, d, mkt });
+  return out;
+}
+
+function matchesQuery(it, q) {
+  if (!q) return true;
+  const sq = staleQuery(q);
+  if (sq) {
+    const sd = OrderState.staleDays(it.d);
+    return sd !== null && (sq.exact ? sd === sq.n : sd >= sq.n);
+  }
+  const d = it.d;
+  return [it.id, d.asin, d.buyerOrderId, d.status, d.amazonCarrier, d.amazonTrackingId, d.warehouse, d.warehouseId, d.shipmentId,
+    d.whTracking, d.cargoCompany, d.whStatus, d.whTrackStatus, OrderState.staleText(d)]
+    .some(v => v && String(v).toLowerCase().includes(q));
+}
+
+function render() {
+  const items = allItems();
+  const q = $('q').value.trim().toLowerCase();
+  $('qclr').style.display = q ? 'block' : 'none';
+
+  // Sayaçlar (panelle aynı: Teslim yalnız kendi sekmesinde ve "Tümü"de)
+  const counts = Object.fromEntries(FILTERS.map(([k]) => [k, 0]));
+  const searched = items.filter(it => matchesQuery(it, q));
+  for (const it of searched) for (const [k, , fn] of FILTERS) if (fn(it.d)) counts[k]++;
+  $('chips').innerHTML = FILTERS.map(([k, label]) =>
+    `<button class="chip ${UI.filter === k ? 'on' : ''}" data-f="${k}">${label}<b>${counts[k]}</b></button>`).join('');
+
+  const fn = (FILTERS.find(f => f[0] === UI.filter) || FILTERS[0])[2];
+  VIEW = searched.filter(it => {
+    if (OrderState.isDelivered(it.d) && UI.filter !== 'DELIVERED' && UI.filter !== 'ALL') return false;
+    return fn(it.d);
+  });
+  VIEW.sort((a, b) => (b.d.orderDate || 0) - (a.d.orderDate || 0) || String(b.id).localeCompare(String(a.id)));
+
+  const sq = q && staleQuery(q);
+  $('hint').textContent = sq ? `Kargo durumu ${sq.exact ? 'tam ' + sq.n + ' gündür' : sq.n + ' gün ve daha uzun süredir'} aynı olanlar · ${VIEW.length} sipariş` : (q ? `${VIEW.length} sonuç` : '');
+
+  shown = 0;
+  $('list').innerHTML = '';
+  more();
+}
+
+function more() {
+  const list = $('list');
+  list.querySelector('.more')?.remove();
+  if (!VIEW.length) { list.innerHTML = `<div class="empty">${Object.keys(DATA).length ? 'Bu filtrede sipariş yok' : 'Yükleniyor…'}</div>`; return; }
+  const showStore = UI.mkt === 'ALL' && CFG.mkts.length > 1;
+  const next = VIEW.slice(shown, shown + PAGE);
+  list.insertAdjacentHTML('beforeend', next.map(it => cardHtml(it, showStore)).join(''));
+  shown += next.length;
+  if (shown < VIEW.length) list.insertAdjacentHTML('beforeend', `<div class="more">${shown} / ${VIEW.length} — kaydırınca devamı gelir</div>`);
+}
+
+function fillMktSelect() {
+  const opts = [];
+  if (CFG.mkts.length > 1) opts.push(`<option value="ALL">Tüm mağazalar (${CFG.mkts.length})</option>`);
+  for (const m of CFG.mkts) opts.push(`<option value="${esc(m)}">${esc(STORE_NAMES[m] || 'Mağaza ' + m)}</option>`);
+  $('mkt').innerHTML = opts.join('');
+  if (UI.mkt !== 'ALL' && !CFG.mkts.includes(UI.mkt)) UI.mkt = 'ALL';
+  if (CFG.mkts.length === 1) UI.mkt = CFG.mkts[0];
+  $('mkt').value = UI.mkt;
+  const t = UI.mkt === 'ALL' ? 'Tüm mağazalar' : (STORE_NAMES[UI.mkt] || 'Mağaza ' + UI.mkt);
+  $('title').textContent = t; document.title = `SF · ${t}`;
+}
+
+function showErr(msg) { const e = $('err'); e.textContent = msg || ''; e.style.display = msg ? 'block' : 'none'; }
+
+let loading = false, lastLoad = 0;
+async function load() {
+  if (!CFG || loading) return;
+  loading = true; $('btn-refresh').classList.add('spin');
+  try {
+    const [acc, hb, ...dbs] = await Promise.all([
+      sbRow('ACCOUNTS').catch(() => null),
+      sbRow('SERVER_HEARTBEAT').catch(() => null),
+      ...CFG.mkts.map(m => sbRow(`DB_${m}`)),
+    ]);
+    const accounts = Array.isArray(acc?.value) ? acc.value : [];
+    STORE_NAMES = {};
+    for (const m of CFG.mkts) {
+      const a = accounts.find(x => [x.id, x.marketPlaceId, x.marketplaceId].map(String).includes(String(m)));
+      STORE_NAMES[m] = a?.storeName || a?.name || `Mağaza ${m}`;
+    }
+    DATA = {};
+    CFG.mkts.forEach((m, i) => { const v = dbs[i]?.value; DATA[m] = v && typeof v === 'object' ? v : {}; });
+
+    const hbAge = hb?.updatedAt ? Math.round((Date.now() - hb.updatedAt) / 60000) : null;
+    const on = hbAge !== null && hbAge < 20;
+    $('srv').innerHTML = `<span class="dot ${hbAge === null ? '' : on ? 'on' : 'off'}"></span>Sunucu: ${hbAge === null ? 'bilinmiyor' : on ? 'aktif' : 'durdu'}${hbAge !== null ? ` · ${hbAge < 1 ? 'şimdi' : hbAge + ' dk önce'}` : ''}`;
+    $('upd').textContent = 'Yenilendi ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    lastLoad = Date.now();
+    showErr('');
+    fillMktSelect();
+    render();
+  } catch (e) {
+    showErr(e.status === 401 || e.status === 403 ? 'Supabase anahtarı geçersiz — ⚙️ Ayarlar\'dan kontrol et.' : `Veri alınamadı (${e.message}). İnternet bağlantını kontrol edip ↻ ile tekrar dene.`);
+    if (!Object.keys(DATA).length) $('list').innerHTML = '';
+  } finally {
+    loading = false; $('btn-refresh').classList.remove('spin');
+  }
+}
+
+// ───────── Ayar ekranı ─────────
+function openCfg(first) {
+  $('c-url').value = CFG?.url || ''; $('c-key').value = CFG?.key || ''; $('c-mkts').value = (CFG?.mkts || []).join(',');
+  $('c-err').textContent = ''; $('c-cancel').style.display = first ? 'none' : 'block';
+  $('cfg').style.display = 'block';
+}
+function saveCfg() {
+  const url = $('c-url').value.trim().replace(/\/+$/, '');
+  const key = $('c-key').value.trim();
+  const mkts = [...new Set($('c-mkts').value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean))];
+  const err = m => { $('c-err').textContent = m; };
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) return err('Supabase URL https://xxxx.supabase.co biçiminde olmalı.');
+  if (!/^(eyJ|sb_publishable_)[A-Za-z0-9._-]+$/.test(key) || key.length < 40)
+    return err(/•/.test(key) ? 'Anahtar gizlenmiş (•••) kopyalanmış — tamamını kopyala.' : 'Bu bir Supabase anon/publishable anahtarı değil (eyJ… veya sb_publishable_… olmalı).');
+  if (!mkts.length || mkts.some(m => !/^\d+$/.test(m))) return err('En az bir mağaza ID\'si gir (yalnız rakam, virgülle ayır).');
+  CFG = { url, key, mkts };
+  ls.set(CFG_KEY, CFG);
+  $('cfg').style.display = 'none';
+  DATA = {}; $('list').innerHTML = '<div class="empty">Yükleniyor…</div>';
+  load();
+}
+
+// ───────── Olaylar ─────────
+$('btn-cfg').onclick = () => openCfg(false);
+$('c-cancel').onclick = () => { $('cfg').style.display = 'none'; };
+$('c-save').onclick = saveCfg;
+$('c-theme').onclick = () => { UI.theme = { '': 'light', light: 'dark', dark: '' }[UI.theme || '']; saveUI(); applyTheme(); };
+$('btn-refresh').onclick = () => load();
+$('mkt').onchange = e => { UI.mkt = e.target.value; saveUI(); fillMktSelect(); render(); window.scrollTo(0, 0); };
+let qTimer;
+$('q').oninput = () => { clearTimeout(qTimer); qTimer = setTimeout(render, 150); };
+$('qclr').onclick = () => { $('q').value = ''; render(); };
+$('chips').onclick = e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  UI.filter = b.dataset.f; saveUI(); render(); window.scrollTo(0, 0);
+};
+$('list').onclick = e => {
+  const b = e.target.closest('.cp'); if (!b) return;
+  const v = b.dataset.copy;
+  (navigator.clipboard?.writeText(v) || Promise.reject()).then(() => { b.textContent = '✓'; setTimeout(() => { b.textContent = '⧉'; }, 1200); }).catch(() => {});
+};
+window.addEventListener('scroll', () => {
+  if (shown < VIEW.length && window.innerHeight + window.scrollY > document.body.offsetHeight - 600) more();
+}, { passive: true });
+// Görünürken dakikada bir yenile; uygulamaya geri dönünce bayatsa hemen yenile
+setInterval(() => { if (!document.hidden) load(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastLoad > 30000) load(); });
+
+applyTheme();
+if (!CFG || !CFG.url || !CFG.key || !Array.isArray(CFG.mkts) || !CFG.mkts.length) openCfg(true);
+else { fillMktSelect(); $('list').innerHTML = '<div class="empty">Yükleniyor…</div>'; load(); }
+</script>
+</body>
+</html>
