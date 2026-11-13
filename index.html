@@ -28,20 +28,21 @@
   --g: #059669; --g-bg: #dcfce7; --b: #0284c7; --b-bg: #e0f2fe; --o: #c2410c; --o-bg: #ffedd5;
   --r: #dc2626; --r-bg: #fee2e2; --p: #7c3aed; --p-bg: #ede9fe; --gy: #475569; --gy-bg: #f1f5f9;
   --shadow: 0 1px 2px rgba(15,23,42,.06), 0 4px 14px rgba(15,23,42,.05);
+  --acc-bg: #fff3e6; --acc-tx: #c2410c;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg0: #0b1220; --bg1: #111a2b; --bg2: #16213a; --line: rgba(148,163,184,.14);
   --tx: #e2e8f0; --tx2: #a3b1c6; --tx3: #64748b; --link: #7cb3ff; --link2: #fb9a5b;
   --g: #4ade80; --g-bg: rgba(74,222,128,.13); --b: #38bdf8; --b-bg: rgba(56,189,248,.13); --o: #fb923c; --o-bg: rgba(251,146,60,.14);
   --r: #f87171; --r-bg: rgba(248,113,113,.14); --p: #a78bfa; --p-bg: rgba(167,139,250,.14); --gy: #a3b1c6; --gy-bg: rgba(148,163,184,.12);
-  --shadow: 0 1px 2px rgba(0,0,0,.3);
+  --shadow: 0 1px 2px rgba(0,0,0,.3); --acc-bg: rgba(255,123,0,.15); --acc-tx: #fdba74;
 } }
 :root[data-theme="dark"] {
   --bg0: #0b1220; --bg1: #111a2b; --bg2: #16213a; --line: rgba(148,163,184,.14);
   --tx: #e2e8f0; --tx2: #a3b1c6; --tx3: #64748b; --link: #7cb3ff; --link2: #fb9a5b;
   --g: #4ade80; --g-bg: rgba(74,222,128,.13); --b: #38bdf8; --b-bg: rgba(56,189,248,.13); --o: #fb923c; --o-bg: rgba(251,146,60,.14);
   --r: #f87171; --r-bg: rgba(248,113,113,.14); --p: #a78bfa; --p-bg: rgba(167,139,250,.14); --gy: #a3b1c6; --gy-bg: rgba(148,163,184,.12);
-  --shadow: 0 1px 2px rgba(0,0,0,.3);
+  --shadow: 0 1px 2px rgba(0,0,0,.3); --acc-bg: rgba(255,123,0,.15); --acc-tx: #fdba74;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; background: var(--bg0); color: var(--tx); font: 14px/1.4 'DM Sans', system-ui, sans-serif; overflow-x: hidden; }
@@ -107,9 +108,102 @@ main { padding: 8px 16px calc(env(safe-area-inset-bottom) + 24px); }
 .btn2 { width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); color: var(--tx2); margin-top: 8px; }
 .cfgerr { color: var(--r); font-size: 13px; margin-top: 10px; min-height: 1em; }
 .note { font-size: 12px; color: var(--tx3); margin-top: 14px; }
+
+/* ═════════════ MASAÜSTÜ (≥1024px) — SaaS düzeni ═════════════ */
+#desk { display: none; }
+@media (min-width: 1024px) {
+  body.has-desk > header, body.has-desk > .chips, body.has-desk > .hint, body.has-desk > #err, body.has-desk > main { display: none !important; }
+  body.has-desk { overflow: hidden; }
+  #desk { display: grid; grid-template-columns: 240px minmax(0, 1fr); height: 100vh; }
+}
+#desk { --sb: var(--bg1); --row: 54px; font-size: 13px; }
+.sb { background: var(--sb); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.sb-brand { display: flex; align-items: center; gap: 10px; padding: 18px 18px 14px; }
+.sb-brand b { font-size: 15px; } .sb-brand small { display: block; color: var(--tx3); font-size: 11px; font-weight: 500; }
+.sb-scroll { flex: 1; overflow-y: auto; padding: 4px 10px 12px; }
+.sb-h { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--tx3); padding: 14px 10px 6px; display: flex; justify-content: space-between; }
+.nav { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; color: var(--tx2); padding: 7px 10px; border-radius: 8px; text-align: left; font-size: 13px; }
+.nav:hover { background: var(--bg2); color: var(--tx); }
+.nav.on { background: var(--acc-bg); color: var(--acc-tx); font-weight: 600; }
+.nav .ic { width: 18px; text-align: center; flex: none; font-size: 13px; }
+.nav .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav .ct { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--tx3); }
+.nav.on .ct { color: var(--acc-tx); }
+.nav .att { background: var(--r-bg); color: var(--r); border-radius: 999px; padding: 0 6px; font-size: 11px; font-weight: 700; margin-left: 4px; }
+.sb-foot { border-top: 1px solid var(--line); padding: 12px 16px; display: grid; gap: 8px; font-size: 12px; color: var(--tx2); }
+.sb-foot .row { display: flex; align-items: center; gap: 6px; }
+.sb-foot .btns { display: flex; gap: 6px; }
+.sb-foot button { flex: 1; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg2); color: var(--tx2); font-size: 12px; }
+.sb-foot button:hover { color: var(--tx); }
+
+.mn { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--bg0); }
+.tb { display: flex; align-items: center; gap: 10px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--bg1); flex-wrap: wrap; }
+.tb h2 { margin: 0 8px 0 0; font-size: 17px; font-weight: 700; white-space: nowrap; }
+.srch { position: relative; flex: 1; min-width: 240px; max-width: 520px; }
+.srch input { width: 100%; height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg2); color: var(--tx); padding: 0 34px 0 34px; font: inherit; }
+.srch input:focus, .tb select:focus { outline: 2px solid var(--acc); outline-offset: -1px; }
+.srch .mg { position: absolute; left: 11px; top: 9px; color: var(--tx3); font-size: 13px; }
+.srch kbd { position: absolute; right: 8px; top: 8px; font: 11px 'JetBrains Mono', monospace; color: var(--tx3); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--bg1); }
+.tb select { width: auto; min-width: 150px; height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg2); color: var(--tx); padding: 0 10px; font: inherit; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--bg2); }
+.seg button { border: 0; background: none; color: var(--tx2); padding: 0 11px; height: 34px; font-size: 12px; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--bg1); color: var(--tx); font-weight: 700; box-shadow: inset 0 -2px 0 var(--acc); }
+.tbtn { height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg1); color: var(--tx); padding: 0 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.tbtn:hover { background: var(--bg2); }
+.tbtn.pri { background: var(--tx); color: var(--bg1); border-color: var(--tx); }
+.tb .sp { flex: 1; }
+
+.kp { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; padding: 16px 24px 4px; }
+.kpi { background: var(--bg1); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+.kpi .l { font-size: 12px; color: var(--tx2); display: flex; align-items: center; gap: 6px; }
+.kpi .v { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .s { font-size: 12px; color: var(--tx3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .v.m { font-size: 15px; line-height: 1.35; white-space: normal; }
+.kpi .v.g { color: var(--g); } .kpi .v.r { color: var(--r); } .kpi .v.o { color: var(--o); } .kpi .v.b { color: var(--b); }
+.kpi.click { cursor: pointer; } .kpi.click:hover { border-color: var(--tx3); }
+
+.tw { flex: 1; min-height: 0; margin: 12px 24px 0; background: var(--bg1); border: 1px solid var(--line); border-radius: 12px 12px 0 0; display: flex; flex-direction: column; }
+.vs { flex: 1; overflow: auto; position: relative; border-radius: 12px 12px 0 0; }
+.grid { display: grid; grid-template-columns: 176px 104px 168px 138px 128px 142px minmax(200px, 1fr) 88px; min-width: 1142px; }
+.th { position: sticky; top: 0; z-index: 2; background: var(--bg2); border-bottom: 1px solid var(--line); }
+.th > div { padding: 9px 12px; font-size: 11px; font-weight: 700; color: var(--tx2); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; user-select: none; }
+.th > div.so { cursor: pointer; } .th > div.so:hover { color: var(--tx); }
+.th > div .ar { color: var(--acc); margin-left: 3px; }
+.th > div.rt, .tr > div.rt { text-align: right; }
+.body { position: relative; }
+.tr { position: absolute; left: 0; right: 0; height: var(--row); border-bottom: 1px solid var(--line); cursor: pointer; box-shadow: inset 3px 0 0 transparent; }
+.tr:hover { background: var(--bg2); } .tr.sel { background: var(--acc-bg); }
+.tr.k-del { box-shadow: inset 3px 0 0 var(--g); } .tr.k-shp { box-shadow: inset 3px 0 0 var(--b); } .tr.k-dep { box-shadow: inset 3px 0 0 #6366f1; }
+.tr.k-alm { box-shadow: inset 3px 0 0 var(--r); } .tr.k-ref { box-shadow: inset 3px 0 0 var(--o); }
+.tr > div { padding: 8px 12px; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.c1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--tx); }
+.c2 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--tx3); font-size: 12px; }
+.tr .mono, .dw .mono { font-size: 12px; }
+.tr .cp { display: none; } .tr:hover .cp { display: inline; }
+.dash { color: var(--tx3); }
+.tf { display: flex; justify-content: space-between; align-items: center; padding: 8px 24px; font-size: 12px; color: var(--tx3); border-top: 1px solid var(--line); background: var(--bg1); margin: 0 24px 16px; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 12px 12px; }
+.empty-d { position: absolute; inset: 60px 0 auto; text-align: center; color: var(--tx3); font-size: 14px; }
+.derr { margin: 12px 24px 0; background: var(--r-bg); color: var(--r); border-radius: 10px; padding: 10px 12px; display: none; }
+
+/* Detay paneli */
+.ov { position: fixed; inset: 0; background: rgba(15, 23, 42, .28); z-index: 30; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.ov.on { opacity: 1; pointer-events: auto; }
+.dw { position: fixed; top: 0; right: 0; bottom: 0; width: 440px; max-width: 92vw; background: var(--bg1); border-left: 1px solid var(--line); z-index: 31;
+  transform: translateX(100%); transition: transform .18s ease; display: flex; flex-direction: column; box-shadow: -12px 0 32px rgba(15, 23, 42, .12); }
+.dw.on { transform: none; }
+.dw-h { padding: 18px 20px 14px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-start; }
+.dw-h .t { flex: 1; min-width: 0; } .dw-h .t b { font-size: 16px; } .dw-h .t div { color: var(--tx3); font-size: 12px; margin-top: 3px; }
+.dw-b { flex: 1; overflow-y: auto; padding: 6px 20px 20px; }
+.sec { margin-top: 16px; } .sec h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--tx3); }
+.kv { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 7px 12px; font-size: 13px; }
+.kv > span:nth-child(odd) { color: var(--tx2); } .kv > span:nth-child(even) { overflow-wrap: anywhere; }
+.acts { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 20px; border-top: 1px solid var(--line); }
+.acts a { height: 34px; border-radius: 8px; border: 1px solid var(--line); padding: 0 12px; display: inline-flex; align-items: center; color: var(--tx); font-size: 13px; }
+.acts a:hover { background: var(--bg2); }
 </style>
 </head>
-<body>
+<body class="has-desk">
 
 <header>
   <div class="hrow">
@@ -135,6 +229,49 @@ main { padding: 8px 16px calc(env(safe-area-inset-bottom) + 24px); }
 <div class="hint" id="hint"></div>
 <div class="err" id="err"></div>
 <main id="list"></main>
+
+
+<!-- ═════════════ MASAÜSTÜ ═════════════ -->
+<div id="desk">
+  <aside class="sb">
+    <div class="sb-brand"><div class="logo">SF</div><div><b>SF Siparişler</b><small>Sunucu Modu · salt okunur</small></div></div>
+    <div class="sb-scroll">
+      <div class="sb-h"><span>Durum</span></div>
+      <div id="d-status"></div>
+      <div class="sb-h"><span>Mağazalar</span><span id="d-mcount"></span></div>
+      <div id="d-stores"></div>
+    </div>
+    <div class="sb-foot">
+      <div class="row" id="d-srv"><span class="dot"></span>Sunucu: —</div>
+      <div class="row" id="d-upd" style="color:var(--tx3)">—</div>
+      <div class="btns"><button id="d-theme" title="Tema">🌓 Tema</button><button id="d-cfg" title="Bağlantı ayarları">⚙️ Ayarlar</button></div>
+    </div>
+  </aside>
+  <section class="mn">
+    <div class="tb">
+      <h2 id="d-title">Tüm mağazalar</h2>
+      <div class="srch"><span class="mg">⌕</span><input id="d-q" type="search" placeholder="Sipariş, ASIN, buyer no, takip no, durum… · 3 gün · =3" autocomplete="off" spellcheck="false"><kbd>/</kbd></div>
+      <select id="d-wh" aria-label="Depo"></select>
+      <div class="seg" id="d-range">
+        <button data-r="today">Bugün</button><button data-r="7">7 gün</button><button data-r="30">30 gün</button><button data-r="all">Tümü</button>
+      </div>
+      <span class="sp"></span>
+      <button class="tbtn" id="d-refresh" title="Yenile">↻ Yenile</button>
+      <button class="tbtn pri" id="d-csv" title="Görünen siparişleri CSV olarak indir">⤓ CSV</button>
+    </div>
+    <div class="derr" id="d-err"></div>
+    <div class="kp" id="d-kpi"></div>
+    <div class="tw">
+      <div class="vs" id="d-vs">
+        <div class="grid th" id="d-th"></div>
+        <div class="body" id="d-body"></div>
+      </div>
+    </div>
+    <div class="tf"><span id="d-foot">—</span><span>Satıra tıkla: detay · <b>/</b> ara · <b>Esc</b> kapat</span></div>
+  </section>
+</div>
+<div class="ov" id="d-ov"></div>
+<aside class="dw" id="d-dw" aria-label="Sipariş detayı"></aside>
 
 <div id="cfg">
   <div class="cfgbox">
@@ -386,6 +523,7 @@ function matchesQuery(it, q) {
 }
 
 function render() {
+  if (isDesk()) return renderDesk();
   const items = allItems();
   const q = $('q').value.trim().toLowerCase();
   $('qclr').style.display = q ? 'block' : 'none';
@@ -435,7 +573,7 @@ function fillMktSelect() {
   $('title').textContent = t; document.title = `SF · ${t}`;
 }
 
-function showErr(msg) { const e = $('err'); e.textContent = msg || ''; e.style.display = msg ? 'block' : 'none'; }
+function showErr(msg) { for (const e of [$('err'), $('d-err')]) { e.textContent = msg || ''; e.style.display = msg ? 'block' : 'none'; } }
 
 let loading = false, lastLoad = 0;
 async function load() {
@@ -520,9 +658,258 @@ window.addEventListener('scroll', () => {
 setInterval(() => { if (!document.hidden) load(); }, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastLoad > 30000) load(); });
 
+
+// ═════════════ MASAÜSTÜ (≥1024px) ═════════════
+const DESK_MQ = window.matchMedia('(min-width: 1024px)');
+const isDesk = () => DESK_MQ.matches;
+UI.wh = UI.wh || ''; UI.range = UI.range || 'all'; UI.sort = UI.sort || { k: 'date', d: -1 };
+const ROW_H = 54;
+const STATUS_ICON = { ALL: '▦', AMZ: '🛒', COMING: '🚚', DEPOT: '🏬', SHIPPED: '✈️', DELIVERED: '✅', STALE: '⏳', ALARM: '🚨', SELLER_REFUNDED: '💸', BUYER_REFUNDED: '💰', OTHER: '👥', NOPV: '🔑' };
+const COLS = [
+  ['Sipariş · Mağaza', 'date'], ['ASIN'], ['Amazon · Buyer no'], ['AMZ Kargo'], ['Depo', 'wh'], ['Kargo'], ['Teslimat', 'stale'], ['Kâr', 'profit', 'rt'],
+];
+let VIEWD = [], DSEL = null;
+const dash = '<span class="dash">—</span>';
+const fmtMoney = (n, cur) => `${n < 0 ? '−' : ''}${SYM[cur] || ''}${Math.abs(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const qVal = () => (isDesk() ? $('d-q') : $('q')).value.trim().toLowerCase();
+const kindOf = d => OrderState.isAlarm(d) ? 'k-alm' : (d.isSellerRefunded || d.isBuyerRefunded) ? 'k-ref'
+  : OrderState.isDelivered(d) ? 'k-del' : OrderState.isShipped(d) ? 'k-shp' : OrderState.isDepot(d) ? 'k-dep' : '';
+
+function inRange(d) {
+  if (UI.range === 'all') return true;
+  const t = d.orderDate || 0;
+  if (UI.range === 'today') { const s = new Date(); s.setHours(0, 0, 0, 0); return t >= s.getTime(); }
+  return t >= Date.now() - (+UI.range) * 86400000;
+}
+
+function renderDesk() {
+  const q = qVal();
+  const base = allItems();
+  const pool = base.filter(it => (!UI.wh || (it.d.warehouse || '—') === UI.wh) && inRange(it.d) && matchesQuery(it, q));
+  const counts = Object.fromEntries(FILTERS.map(([k]) => [k, 0]));
+  for (const it of pool) for (const [k, , fn] of FILTERS) if (fn(it.d)) counts[k]++;
+  const fn = (FILTERS.find(f => f[0] === UI.filter) || FILTERS[0])[2];
+  VIEWD = pool.filter(it => !(OrderState.isDelivered(it.d) && UI.filter !== 'DELIVERED' && UI.filter !== 'ALL') && fn(it.d));
+  sortView();
+
+  // Kenar çubuğu: durumlar
+  $('d-status').innerHTML = FILTERS.map(([k, label]) =>
+    `<button class="nav ${UI.filter === k ? 'on' : ''}" data-f="${k}"><span class="ic">${STATUS_ICON[k] || '•'}</span><span class="lb">${esc(label.replace(/^\p{Extended_Pictographic}\uFE0F?\s*/u, ''))}</span><span class="ct">${counts[k].toLocaleString('tr-TR')}</span></button>`).join('');
+  // Kenar çubuğu: mağazalar (tümü + her biri; dikkat = alarm + kargo bekliyor)
+  const storeRow = (val, name, n, att) => `<button class="nav ${UI.mkt === val ? 'on' : ''}" data-m="${esc(val)}"><span class="ic">${val === 'ALL' ? '◎' : '🏪'}</span><span class="lb" title="${esc(name)}">${esc(name)}</span>${att ? `<span class="att" title="Alarm + kargo bekliyor">${att}</span>` : ''}<span class="ct">${n.toLocaleString('tr-TR')}</span></button>`;
+  let allN = 0, allAtt = 0; const rows = [];
+  for (const m of CFG.mkts) {
+    const list = Object.values(DATA[m] || {}).filter(d => d && typeof d === 'object');
+    const att = list.filter(d => OrderState.isAlarm(d) || OrderState.isStale(d)).length;
+    allN += list.length; allAtt += att;
+    rows.push(storeRow(m, STORE_NAMES[m] || 'Mağaza ' + m, list.length, att));
+  }
+  $('d-stores').innerHTML = (CFG.mkts.length > 1 ? storeRow('ALL', 'Tüm mağazalar', allN, allAtt) : '') + rows.join('');
+  $('d-mcount').textContent = CFG.mkts.length;
+  $('d-srv').innerHTML = $('srv').innerHTML; $('d-upd').textContent = $('upd').textContent;
+  $('d-title').textContent = UI.mkt === 'ALL' ? 'Tüm mağazalar' : (STORE_NAMES[UI.mkt] || 'Mağaza ' + UI.mkt);
+
+  // Depo seçici (veriden)
+  const whCount = {};
+  for (const it of base) { const w = it.d.warehouse || '—'; whCount[w] = (whCount[w] || 0) + 1; }
+  const whs = Object.keys(whCount).sort((a, b) => whCount[b] - whCount[a]);
+  if (UI.wh && !whCount[UI.wh]) UI.wh = '';
+  $('d-wh').innerHTML = `<option value="">Tüm depolar</option>` + whs.map(w => `<option value="${esc(w)}" ${UI.wh === w ? 'selected' : ''}>${esc(w === '—' ? 'Depo yok' : w)} (${whCount[w]})</option>`).join('');
+  document.querySelectorAll('#d-range button').forEach(b => b.classList.toggle('on', b.dataset.r === UI.range));
+
+  // KPI kartları
+  const profit = {}, today = {}; const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  for (const it of VIEWD) {
+    const p = parseFloat(it.d.finalProfit ?? it.d.profit); if (isNaN(p)) continue;
+    const c = currencyOf(it.mkt); profit[c] = (profit[c] || 0) + p;
+    if ((it.d.orderDate || 0) >= t0.getTime()) today[c] = (today[c] || 0) + p;
+  }
+  const money = o => Object.keys(o).length ? Object.entries(o).map(([c, v]) => fmtMoney(v, c)).join(' · ') : '—';
+  const kpi = (l, v, s, cls = '', f = '') => `<div class="kpi ${f ? 'click' : ''}" ${f ? `data-f="${f}"` : ''}><div class="l">${l}</div><div class="v ${cls}" title="${esc(String(v).replace(/<[^>]+>/g, ''))}">${v}</div><div class="s">${s}</div></div>`;
+  const label = (FILTERS.find(f => f[0] === UI.filter) || FILTERS[0])[1];
+  $('d-kpi').innerHTML = [
+    kpi('Gösterilen sipariş', VIEWD.length.toLocaleString('tr-TR'), `${esc(label)} · toplam ${pool.length.toLocaleString('tr-TR')}`),
+    kpi('✈️ Kargoda', counts.SHIPPED.toLocaleString('tr-TR'), `${counts.COMING} yolda · ${counts.DEPOT} depoda`, 'b', 'SHIPPED'),
+    kpi('✅ Teslim', counts.DELIVERED.toLocaleString('tr-TR'), 'müşteriye ulaştı', 'g', 'DELIVERED'),
+    kpi('⏳ Kargo bekliyor', counts.STALE.toLocaleString('tr-TR'), '3+ gündür aynı durumda', counts.STALE ? 'o' : '', 'STALE'),
+    kpi('🚨 Alarm', counts.ALARM.toLocaleString('tr-TR'), `${counts.SELLER_REFUNDED + counts.BUYER_REFUNDED} iade`, counts.ALARM ? 'r' : '', 'ALARM'),
+    kpi('Kâr', Object.keys(profit).length > 1 ? Object.entries(profit).map(([c, v]) => fmtMoney(v, c)).join('<br>') : money(profit), `bugün ${money(today)}`, Object.keys(profit).length > 1 ? 'g m' : 'g'),
+  ].join('');
+
+  // Tablo başlığı
+  $('d-th').innerHTML = COLS.map(([l, k, cls]) =>
+    `<div class="${k ? 'so' : ''} ${cls || ''}" ${k ? `data-s="${k}"` : ''}>${l}${UI.sort.k === k && k ? `<span class="ar">${UI.sort.d < 0 ? '↓' : '↑'}</span>` : ''}</div>`).join('');
+  $('d-foot').textContent = `${VIEWD.length.toLocaleString('tr-TR')} sipariş${q ? ' · arama: "' + q + '"' : ''}${UI.wh ? ' · ' + UI.wh : ''}`;
+  const sq = q && staleQuery(q);
+  if (sq) $('d-foot').textContent += ` · kargo durumu ${sq.exact ? 'tam ' + sq.n + ' gündür' : sq.n + '+ gündür'} aynı`;
+  $('d-body').style.height = (VIEWD.length * ROW_H) + 'px';
+  _vsStart = -1;
+  drawRows(true);
+  if (DSEL && $('d-dw').classList.contains('on')) {
+    const it = VIEWD.find(x => x.mkt === DSEL.mkt && x.id === DSEL.id) || allItems().find(x => x.mkt === DSEL.mkt && x.id === DSEL.id);
+    if (it) drawDrawer(it);
+  }
+}
+
+function sortView() {
+  const { k, d } = UI.sort;
+  const val = it => k === 'store' ? (STORE_NAMES[it.mkt] || '') : k === 'wh' ? (it.d.warehouse || '')
+    : k === 'stale' ? (OrderState.staleDays(it.d) ?? -1) : k === 'profit' ? (parseFloat(it.d.finalProfit ?? it.d.profit) || 0) : (it.d.orderDate || 0);
+  VIEWD.sort((a, b) => {
+    const x = val(a), y = val(b);
+    const c = typeof x === 'string' ? x.localeCompare(y, 'tr') : x - y;
+    return c * d || (b.d.orderDate || 0) - (a.d.orderDate || 0);
+  });
+}
+
+let _vsStart = -1, _vsEnd = -1;
+function drawRows(force) {
+  const vs = $('d-vs'), body = $('d-body');
+  if (!VIEWD.length) { body.innerHTML = `<div class="empty-d">${Object.keys(DATA).length ? 'Bu filtrede sipariş yok' : 'Yükleniyor…'}</div>`; body.style.height = '200px'; return; }
+  const top = Math.max(0, vs.scrollTop - $('d-th').offsetHeight);
+  const first = Math.max(0, Math.floor(top / ROW_H) - 8);
+  const last = Math.min(VIEWD.length - 1, Math.ceil((top + vs.clientHeight) / ROW_H) + 8);
+  if (!force && first === _vsStart && last === _vsEnd) return;
+  _vsStart = first; _vsEnd = last;
+  let h = '';
+  for (let i = first; i <= last; i++) h += rowHtml(VIEWD[i], i);
+  body.innerHTML = h;
+}
+
+function rowHtml(it, i) {
+  const { id, d, mkt } = it;
+  const sd = OrderState.staleDays(d);
+  const p = parseFloat(d.finalProfit ?? d.profit);
+  const sel = DSEL && DSEL.id === id && DSEL.mkt === mkt;
+  const buyer = d.buyerOrderId && d.buyerOrderId !== '—' ? d.buyerOrderId : '';
+  const staleB = sd !== null ? `<span class="bd ${sd >= 5 ? 'bd-r' : sd >= 3 ? 'bd-o' : ''}">⏳ ${esc(OrderState.staleText(d))}</span>` : '';
+  return `<div class="grid tr ${kindOf(d)} ${sel ? 'sel' : ''}" data-i="${i}" style="top:${i * ROW_H}px">
+    <div><span class="c1 mono" title="${esc(id)}">${esc(id)}${copyBtn(id)}</span><span class="c2" title="${esc(STORE_NAMES[mkt] || mkt)}">${d.orderDate ? esc(new Date(d.orderDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })) + ' · ' : ''}${esc(STORE_NAMES[mkt] || 'Mağaza ' + mkt)}</span></div>
+    <div><span class="c1">${d.asin ? link(`https://www.amazon.com/dp/${encodeURIComponent(d.asin)}`, d.asin) : dash}</span></div>
+    <div><span class="c1">${amzBadge(d)}</span><span class="c2">${buyer ? link(`https://www.amazon.com/your-orders/order-details?orderID=${encodeURIComponent(buyer)}`, buyer) + copyBtn(buyer) : 'buyer no yok'}</span></div>
+    <div>${d.amazonTrackingId ? `<span class="c1">${esc(d.amazonCarrier || 'Kargo')}</span><span class="c2">${link(amzTrackUrl(d), d.amazonTrackingId)}${copyBtn(d.amazonTrackingId)}</span>` : `<span class="c1">${dash}</span>`}</div>
+    <div><span class="c1" title="${esc(d.warehouse || '')}">${esc(d.warehouse || '—')}</span><span class="c2" title="${esc([d.warehouseId, d.whStatus].filter(Boolean).join(' · '))}">${esc([d.warehouseId, d.whStatus].filter(Boolean).join(' · '))}</span></div>
+    <div>${d.whTracking ? `<span class="c1">${esc(d.cargoCompany || 'Kargo')}</span><span class="c2">${link(safeUrl(whTrackUrl(d)), d.whTracking)}${copyBtn(d.whTracking)}</span>` : `<span class="c1">${dash}</span>`}</div>
+    <div><span class="c1" title="${esc(d.whTrackStatus || '')}">${esc(d.whTrackStatus || '—')}</span>${staleB || d.exitDate ? `<span class="c2">${staleB || 'çıkış ' + esc(d.exitDate)}</span>` : ''}</div>
+    <div class="rt"><span class="c1 profit ${isNaN(p) || p === 0 ? '' : p < 0 ? 'neg' : 'pos'}">${isNaN(p) ? dash : fmtMoney(p, currencyOf(mkt))}</span></div>
+  </div>`;
+}
+
+// ── Detay paneli ──
+function openDrawer(it) { DSEL = { id: it.id, mkt: it.mkt }; drawDrawer(it); $('d-dw').classList.add('on'); $('d-ov').classList.add('on'); drawRows(true); }
+function closeDrawer() { $('d-dw').classList.remove('on'); $('d-ov').classList.remove('on'); DSEL = null; drawRows(true); }
+function drawDrawer(it) {
+  const { id, d, mkt } = it;
+  const kv = rows => `<div class="kv">${rows.filter(Boolean).map(([k, v]) => `<span>${k}</span><span>${v || dash}</span>`).join('')}</div>`;
+  const sd = OrderState.staleDays(d);
+  let depotDays = '';
+  if (!d.isShipped && !d.sfDelivered && d.status === 'Delivered') {
+    const ts = d.amazonDeliveredAt || d.deliveredToWarehouseAt || 0;
+    if (ts) depotDays = `${Math.floor((Date.now() - ts) / 86400000)} gündür depoda`;
+  }
+  const p = parseFloat(d.finalProfit ?? d.profit);
+  const buyer = d.buyerOrderId && d.buyerOrderId !== '—' ? d.buyerOrderId : '';
+  const trackUrl = safeUrl(whTrackUrl(d));
+  $('d-dw').innerHTML = `
+    <div class="dw-h"><div class="t"><b class="mono">${esc(id)}</b>${copyBtn(id)}<div>${esc(STORE_NAMES[mkt] || 'Mağaza ' + mkt)}${d.orderDate ? ' · ' + esc(new Date(d.orderDate).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })) : ''}</div></div>
+      <button class="ibtn" id="d-dw-x" aria-label="Kapat">✕</button></div>
+    <div class="dw-b">
+      <div class="sec"><h4>Amazon</h4>${kv([
+        ['Durum', amzBadge(d)], d.amazonStatusText ? ['Açıklama', esc(d.amazonStatusText)] : null,
+        ['ASIN', d.asin ? link(`https://www.amazon.com/dp/${encodeURIComponent(d.asin)}`, d.asin) + copyBtn(d.asin) : ''],
+        ['Buyer no', buyer ? link(`https://www.amazon.com/your-orders/order-details?orderID=${encodeURIComponent(buyer)}`, buyer) + copyBtn(buyer) : ''],
+        ['Kargo', d.amazonTrackingId ? `${esc(d.amazonCarrier || '')} ${link(amzTrackUrl(d), d.amazonTrackingId)}${copyBtn(d.amazonTrackingId)}` : ''],
+        ['Depoya teslim', fmtDate(d.amazonDeliveredAt || d.deliveredToWarehouseAt) ? esc(new Date(d.amazonDeliveredAt || d.deliveredToWarehouseAt).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })) : ''],
+      ])}</div>
+      <div class="sec"><h4>Depo</h4>${kv([
+        ['Depo', esc(d.warehouse || '')], ['Kod', d.warehouseId ? `<span class="mono">${esc(d.warehouseId)}</span>${copyBtn(d.warehouseId)}` : ''],
+        ['Depo durumu', esc(d.whStatus || '')], ['Shipment', d.shipmentId ? `<span class="mono">${esc(d.shipmentId)}</span>` : ''],
+        depotDays ? ['Bekleme', esc(depotDays)] : null, d.exitDate ? ['Çıkış', esc(d.exitDate)] : null,
+      ])}</div>
+      <div class="sec"><h4>Müşteriye kargo</h4>${kv([
+        ['Kargo firması', esc(d.cargoCompany || '')],
+        ['Takip no', d.whTracking ? link(trackUrl, d.whTracking) + copyBtn(d.whTracking) : ''],
+        ['Son durum', esc(d.whTrackStatusFull || d.whTrackStatus || '')],
+        sd !== null ? ['Değişmedi', `<span class="bd ${sd >= 5 ? 'bd-r' : sd >= 3 ? 'bd-o' : ''}">⏳ ${esc(OrderState.staleText(d))}</span> <span class="dash">${esc(fmtDate(d.whTrackStatusAt))} tarihinden beri</span>`] : null,
+      ])}</div>
+      <div class="sec"><h4>Finans</h4>${kv([
+        ['Kâr', isNaN(p) ? '' : `<span class="profit ${p < 0 ? 'neg' : 'pos'}">${fmtMoney(p, currencyOf(mkt))}</span>`],
+        ['Son kontrol', d.lastCheck ? esc(new Date(d.lastCheck).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })) : ''],
+      ])}</div>
+    </div>
+    <div class="acts">
+      <a href="https://panel.sellerflash.com/sellerOrder/${encodeURIComponent(id)}" target="_blank" rel="noopener">SellerFlash'ta aç ↗</a>
+      ${buyer ? `<a href="https://www.amazon.com/your-orders/order-details?orderID=${encodeURIComponent(buyer)}" target="_blank" rel="noopener">Amazon siparişi ↗</a>` : ''}
+      ${trackUrl ? `<a href="${esc(trackUrl)}" target="_blank" rel="noopener">Kargo takibi ↗</a>` : ''}
+    </div>`;
+  $('d-dw-x').onclick = closeDrawer;
+}
+
+// ── CSV ──
+function exportCsv() {
+  const head = ['Sipariş', 'Mağaza', 'Tarih', 'ASIN', 'Amazon durumu', 'Buyer no', 'AMZ kargo', 'AMZ takip', 'Depo', 'Depo kodu', 'Depo durumu', 'Kargo', 'Takip no', 'Teslimat durumu', 'Kaç gündür aynı', 'Kâr', 'Para birimi'];
+  const q = v => { const s = String(v ?? ''); return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const lines = [head.join(';')];
+  for (const { id, d, mkt } of VIEWD) {
+    const p = parseFloat(d.finalProfit ?? d.profit);
+    lines.push([id, STORE_NAMES[mkt] || mkt, d.orderDate ? new Date(d.orderDate).toLocaleDateString('tr-TR') : '', d.asin, d.status, d.buyerOrderId, d.amazonCarrier, d.amazonTrackingId,
+      d.warehouse, d.warehouseId, d.whStatus, d.cargoCompany, d.whTracking, d.whTrackStatus, OrderState.staleDays(d) ?? '', isNaN(p) ? '' : p.toFixed(2).replace('.', ','), currencyOf(mkt)].map(q).join(';'));
+  }
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `sf-siparisler-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ── Olaylar ──
+let dqTimer;
+$('d-q').oninput = () => { $('q').value = $('d-q').value; clearTimeout(dqTimer); dqTimer = setTimeout(render, 150); };
+$('d-wh').onchange = e => { UI.wh = e.target.value; saveUI(); render(); };
+$('d-range').onclick = e => { const b = e.target.closest('button'); if (!b) return; UI.range = b.dataset.r; saveUI(); render(); };
+$('d-refresh').onclick = () => load();
+$('d-csv').onclick = exportCsv;
+$('d-cfg').onclick = () => openCfg(false);
+$('d-theme').onclick = () => $('c-theme').onclick();
+$('d-status').onclick = e => { const b = e.target.closest('.nav'); if (!b) return; UI.filter = b.dataset.f; saveUI(); $('d-vs').scrollTop = 0; render(); };
+$('d-kpi').onclick = e => { const b = e.target.closest('.kpi[data-f]'); if (!b) return; UI.filter = UI.filter === b.dataset.f ? 'ALL' : b.dataset.f; saveUI(); $('d-vs').scrollTop = 0; render(); };
+$('d-stores').onclick = e => { const b = e.target.closest('.nav'); if (!b) return; UI.mkt = b.dataset.m; saveUI(); fillMktSelect(); $('d-vs').scrollTop = 0; render(); };
+$('d-th').onclick = e => {
+  const c = e.target.closest('[data-s]'); if (!c) return;
+  const k = c.dataset.s;
+  UI.sort = UI.sort.k === k ? { k, d: -UI.sort.d } : { k, d: k === 'store' || k === 'wh' ? 1 : -1 };
+  saveUI(); render();
+};
+let _raf = 0;
+$('d-vs').addEventListener('scroll', () => { if (_raf) return; _raf = requestAnimationFrame(() => { _raf = 0; drawRows(false); }); }, { passive: true });
+window.addEventListener('resize', () => { if (isDesk()) drawRows(true); });
+$('d-body').onclick = e => {
+  if (e.target.closest('a')) return;
+  const cp = e.target.closest('.cp'); if (cp) return copyFrom(cp, e);
+  const r = e.target.closest('.tr'); if (!r) return;
+  openDrawer(VIEWD[+r.dataset.i]);
+};
+$('d-dw').onclick = e => { const cp = e.target.closest('.cp'); if (cp) copyFrom(cp, e); };
+$('d-ov').onclick = closeDrawer;
+document.addEventListener('keydown', e => {
+  if (!isDesk()) return;
+  if (e.key === 'Escape' && $('d-dw').classList.contains('on')) { closeDrawer(); return; }
+  if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '') && $('cfg').style.display !== 'block') { e.preventDefault(); $('d-q').focus(); }
+});
+function copyFrom(b, e) {
+  e?.stopPropagation(); e?.preventDefault();
+  const v = b.dataset.copy;
+  (navigator.clipboard?.writeText(v) || Promise.reject()).then(() => { b.textContent = '✓'; setTimeout(() => { b.textContent = '⧉'; }, 1200); }).catch(() => {});
+}
+DESK_MQ.addEventListener('change', () => {
+  if (isDesk()) $('d-q').value = $('q').value; else { $('q').value = $('d-q').value; closeDrawer(); }
+  render();
+});
+
 applyTheme();
 if (!CFG || !CFG.url || !CFG.key || !Array.isArray(CFG.mkts) || !CFG.mkts.length) openCfg(true);
-else { fillMktSelect(); $('list').innerHTML = '<div class="empty">Yükleniyor…</div>'; load(); }
+else { fillMktSelect(); $('list').innerHTML = '<div class="empty">Yükleniyor…</div>'; if (isDesk()) render(); load(); }
 </script>
 </body>
 </html>
